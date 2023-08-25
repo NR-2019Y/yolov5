@@ -3,6 +3,8 @@ import torchvision
 
 _resnet18 = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
 _resnet34 = torchvision.models.resnet34(weights=torchvision.models.ResNet34_Weights.DEFAULT)
+_shufflenet_v2_x2_0 = torchvision.models.shufflenet_v2_x2_0(
+    weights=torchvision.models.ShuffleNet_V2_X2_0_Weights.DEFAULT)
 
 
 class _ResnetToLayer2(nn.Sequential):
@@ -50,23 +52,37 @@ class Resnet34Layer4(nn.Sequential):
         self.layer4 = _resnet34.layer4
 
 
+class ShuffleNetV2X20P3(nn.Sequential):
+    MYEXT_OUT_CH = 244
+
+    def __init__(self):
+        super(ShuffleNetV2X20P3, self).__init__()
+        self.conv1 = _shufflenet_v2_x2_0.conv1
+        self.maxpool = _shufflenet_v2_x2_0.maxpool
+        self.stage2 = _shufflenet_v2_x2_0.stage2
+
+
+class ShuffleNetV2X20P4(nn.Sequential):
+    MYEXT_OUT_CH = 488
+
+    def __init__(self):
+        super(ShuffleNetV2X20P4, self).__init__(_shufflenet_v2_x2_0.stage3)
+
+
+class ShuffleNetV2X20P5(nn.Sequential):
+    MYEXT_OUT_CH = 976
+
+    def __init__(self):
+        super(ShuffleNetV2X20P5, self).__init__(_shufflenet_v2_x2_0.stage4)
+
+
 if __name__ == '__main__':
     import torch
 
-    rt2 = Resnet34ToLayer2()
-    x = torch.rand(2, 3, 640, 640)
-    for nm, md in rt2.named_children():
-        si = x.shape
-        x = md(x)
-        so = x.shape
-        print(nm, si, so)
-    d = {
-        Resnet18ToLayer2: 128,
-        Resnet18Layer3: 256,
-        Resnet18Layer4: 512,
-        Resnet34ToLayer2: 128,
-        Resnet34Layer3: 256,
-        Resnet34Layer4: 512
-    }
-    print(d[Resnet34ToLayer2])
-    print(d[Resnet18ToLayer2])
+    # model = ShuffleNetP3()
+    # x = torch.rand(2, 3, 640, 640)
+    # for nm, md in model.named_children():
+    #     si = x.shape
+    #     x = md(x)
+    #     so = x.shape
+    #     print(nm, si, so)

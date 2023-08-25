@@ -352,6 +352,8 @@ def parse_model(d, ch):  # model_dict, input_channels(3)
                 Resnet34Layer4: 512
             }
             c2 = ch_dic[m]
+        elif hasattr(m, 'MYEXT_OUT_CH'):
+            c2 = m.MYEXT_OUT_CH
         else:
             c2 = ch[f]
 
