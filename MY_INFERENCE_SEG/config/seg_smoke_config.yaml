@@ -1,0 +1,8 @@
+max_dets: 100
+nc: 1
+names: [ 'Smoke' ]
+colors: [ [ 0, 0, 255 ] ]
+width: 640
+height: 640
+conf_threshold: 0.5
+iou_threshold: 0.45
