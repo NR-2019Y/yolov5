@@ -11,21 +11,26 @@ def xyxy2xywh(xyxy: np.ndarray):
 
 
 def NMS(pred: np.ndarray, conf_threshold: float = 0.25, iou_threshold: float = 0.45,
-        agnostic: bool = False):
-    # pred: [N, 5 + num_classes]
+        agnostic: bool = False, nm: int = 0, top_k: int = 1000):
+    # pred: [N, 5 + num_classes + nm]
     # N: number of bboxes
     # 5 = (center_x, center_y, width, height, obj_conf)
 
     # agnostic: if True: do class-independent nms, else different classes do nms respectively
 
-    # output: (x1, y1, x2, y2, conf, cls_id)
+    # output: (x1, y1, x2, y2, conf, cls_id, masks if nm != 0)
     assert pred.ndim == 2
     obj_conf = pred[:, 4]
     num_bboxes = len(pred)
-    cls_id = np.argmax(pred[:, 5:], axis=1)
+    cls_slice = slice(5, None) if nm == 0 else slice(5, -nm)
+    cls_id = np.argmax(pred[:, cls_slice], axis=1)
     cls_conf = pred[range(num_bboxes), 5 + cls_id]
 
     scores = obj_conf * cls_conf
+
+    masks = None
+    if nm != 0:
+        masks = pred[:, -nm:]
 
     bbox_cxcy = pred[:, 0:2]  # [N, 2]
     bbox_half_wh = 0.5 * pred[:, 2:4]  # [N, 2]
@@ -38,10 +43,15 @@ def NMS(pred: np.ndarray, conf_threshold: float = 0.25, iou_threshold: float = 0
     max_wh = 4096
     if not agnostic:
         bbox_xywh[:, 0:2] += cls_id[:, None] * max_wh
-    keep_indices = cv2.dnn.NMSBoxes(bbox_xywh, scores, conf_threshold, iou_threshold)
+    keep_indices = cv2.dnn.NMSBoxes(bbox_xywh, scores, conf_threshold, iou_threshold, top_k=top_k)
     if not len(keep_indices):
         return np.zeros((0, 6), dtype=pred.dtype)
-    xyxy_conf_cls = np.concatenate((
-        bbox[keep_indices], scores[keep_indices, None], cls_id[keep_indices, None]
-    ), axis=1, dtype=np.float32)
-    return xyxy_conf_cls
+    if nm == 0:
+        output = np.concatenate((
+            bbox[keep_indices], scores[keep_indices, None], cls_id[keep_indices, None]
+        ), axis=1, dtype=np.float32)
+    else:
+        output = np.concatenate((
+            bbox[keep_indices], scores[keep_indices, None], cls_id[keep_indices, None], masks[keep_indices]
+        ), axis=1, dtype=np.float32)
+    return output
