@@ -30,6 +30,7 @@ def get_args():
         args.input_video = int(args.input_video)
 
     args.max_dets = cfg_dic['max_dets']
+    args.nm = cfg_dic['nm']
     args.nc = cfg_dic['nc']
     args.names = cfg_dic['names']
     args.colors = cfg_dic['colors']
@@ -87,15 +88,15 @@ def main():
             # proto: (1, 32, 160, 160)
             # _: [(1, 3, 80, 80, 117), (1, 3, 40, 40, 117), (1, 3, 20, 20, 117)]
 
-            toc = time.time()
-            print(f'inference time: {toc - tic:.4f}')
-
             pred = pred[0].cpu().numpy()
             proto = proto[0].cpu().numpy()
 
             # reference: segment/predict.py
 
-            obj_dets = NMS(pred, CONF_THRESHOLD, IOU_THRESHOLD, nm=32, top_k=MAX_DETS)
+            obj_dets = NMS(pred, CONF_THRESHOLD, IOU_THRESHOLD, nm=args.nm, top_k=MAX_DETS)
+            toc = time.time()
+            print(f'inference time: {(toc - tic) * 1000:.4f} ms')
+
             if len(obj_dets) == 0:
                 imm = ori_img
             else:

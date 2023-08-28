@@ -1,5 +1,6 @@
 max_dets: 100
 nc: 1
+nm: 32
 names: [ 'Smoke' ]
 colors: [ [ 0, 0, 255 ] ]
 width: 640
