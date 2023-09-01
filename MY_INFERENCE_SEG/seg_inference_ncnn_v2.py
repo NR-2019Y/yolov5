@@ -14,7 +14,7 @@ def get_args():
     xargparser = argparse.ArgumentParser()
     xargparser.add_argument('--cfg', type=str,
                             default=os.path.join(ROOT, 'MY_INFERENCE_SEG/config/seg_smoke_config.yaml'))
-    xargparser.add_argument('--model_prefix', type=str,
+    xargparser.add_argument('--model-prefix', type=str,
                             default=os.path.join(ROOT, 'weights/yolov5n-seg-smoke-v2'))
     xargparser.add_argument('--input-video', type=str, default=os.path.join(ROOT, 'VIDEO/1.mp4'))
     xargparser.add_argument('--alpha', type=float, default=0.3)
@@ -61,6 +61,7 @@ def main():
 
     net = ncnn.Net()
     net.opt.use_vulkan_compute = True
+    # net.opt.use_bf16_storage = True
     net.load_param(PARAM_FILE)
     net.load_model(BIN_FILE)
 
