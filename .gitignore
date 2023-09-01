@@ -255,3 +255,15 @@ com_crashlytics_export_strings.xml
 crashlytics.properties
 crashlytics-build.properties
 fabric.properties
+train_DEBUG.py
+/runs_old
+/_LOG/
+tst/
+*.param
+*.bin
+*.pth
+/.run/
+*.table
+/CHECK_MODEL
+/MY_DATA
+/MY_SCRIPT
