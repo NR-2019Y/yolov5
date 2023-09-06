@@ -5,5 +5,5 @@ names: [ 'Smoke' ]
 colors: [ [ 0, 0, 255 ] ]
 width: 640
 height: 640
-conf_threshold: 0.5
+conf_threshold: 0.2
 iou_threshold: 0.45
