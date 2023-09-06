@@ -14,3 +14,26 @@ PYTHONPATH=. python MY_INFERENCE_SEG/seg_inference_pt.py --weights runs/train-se
 PYTHONPATH=. python MY_INFERENCE_SEG/seg_inference_pt.py --weights runs/train-seg/shuv2x20y5s_smoke_seg/weights/best.pt
 PYTHONPATH=. python MY_INFERENCE_SEG/seg_inference_pt.py --weights runs_old/train-seg/coco-smoke-5s-seg/weights/best.pt
 PYTHONPATH=. python MY_INFERENCE_SEG/seg_inference_pt.py --weights runs_old/train-seg/coco-smoke-seg/weights/best.pt
+
+
+ln -s $PWD/runs/train-seg/r34y5s_smoke_seg/weights/best.pt weights/smoke/r34y5s.pt
+ln -s $PWD/runs/train-seg/r18y5s_smoke_seg/weights/best.pt weights/smoke/r18y5s.pt
+ln -s $PWD/runs/train-seg/shuv2x20y5s_smoke_seg/weights/best.pt weights/smoke/shuv2x20y5s.pt
+ln -s $PWD/runs_old/train-seg/coco-smoke-5s-seg/weights/best.pt weights/smoke/y5s.pt
+ln -s $PWD/runs_old/train-seg/coco-smoke-seg/weights/best.pt weights/smoke/y5n.pt
+
+export PYTHONPATH=.
+for f in weights/smoke/*.pt; do
+  python MY_INFERENCE_SEG/seg_export_v2.py -i $f -o ${f%.pt}.onnx
+done
+
+for f in weights/smoke/*.onnx; do
+  trtexec --onnx=$f --saveEngine=${f%.onnx}.engine
+done
+
+for f in weights/smoke/*.onnx; do
+  PREFIX=${f%.onnx}
+  onnx2ncnn $f ${PREFIX}.ori.param ${PREFIX}.ori.bin
+  ncnnoptimize ${PREFIX}.ori.param ${PREFIX}.ori.bin ${PREFIX}.param ${PREFIX}.bin 0
+  rm ${PREFIX}.ori.param ${PREFIX}.ori.bin
+done
